@@ -1,74 +1,85 @@
-﻿using System.Timers;
+using System.Timers;
 using Timer = System.Timers.Timer;
 using System.Drawing.Drawing2D;
+
+/*
+Title:
+    Countdown Clock
+Description:
+    This is a simple application which creates a GUI count down clock.
+    It takes in an amount of time in seconds, which it will tick down
+    until it reaches zero, at which point it will play 3 beeps to let
+    the user know the time has passed.
+*/
 
 class window : Form
 {
     Timer timer, drawTimer, beepTimer;
-
     int amount = 0;
-
-    public int time = 0;
-
+    int time = 0;
     Button inputButton, stopButton;
-
     TextBox input;
-
     Label label;
-
-    Graphics g;
-
+    Graphics graphics;
     PointF[] points;
-
     RectangleF clockPointer;
-
     float myAngle = 180;
 
     public window()
     {
-        this.Text = "Countdown";
+        //Initialize the window
+        this.Text = "countdown";
         this.BackColor = Color.LightBlue;
         this.ClientSize = new Size(500, 500);
 
+        //Initialize the GUI
         inputButton = new Button();
         stopButton = new Button();
-
         input = new TextBox();
-
         label = new Label();
 
+        //Initialize the locations of GUI components
         inputButton.Location = new Point(145, 9);
+        stopButton.Location = new Point(200, 55);
         input.Location = new Point(275, 10);
         label.Location = new Point(200, 40);
 
+        //Initialize the sizes of GUI components
         inputButton.Size = new Size(120, 25);
+        stopButton.Size = new Size(10, 10);
         input.Size = new Size(50, 20);
 
-        inputButton.Text = "Aantal seconden:";
-
+        //Initialize the two buttons with their functions
+        inputButton.Text = "Number of seconds:";
         inputButton.Click += parseInput;
 
+        stopButton.Text = "Stop timer";
+        stopButton.Click += stopTheClock;
+
+
+        //Adding the GUI to the screen
         this.Controls.Add(inputButton);
         this.Controls.Add(input);
-
         this.Controls.Add(label);
 
         this.Paint += drawClock;
 
+        //We initalize the 3 points used to draw the triangle of the clock
         points = new PointF[3];
         points[0] = new Point(0, 300);
         points[1] = new Point(150, 150);
         points[2] = new Point(300, 300);
 
-        clockPointer = new RectangleF(-5/2, 0, 5, 100);
+        clockPointer = new RectangleF(-5 / 2, 0, 5, 100);
     }
 
     void parseInput(object o, EventArgs e)
     {
-        timer = new Timer();
+        //Here, if the bool b is false then the parsing failed, but true if it didn't
         bool b = int.TryParse(input.Text, out int x);
         if (b)
         {
+            //If it parsed succesfully, we start the clock
             label.Text = "";
             timer = new Timer(x * 1000);
             timer.Elapsed += whenElapsed;
@@ -84,6 +95,7 @@ class window : Form
         }
     }
 
+    //This function is called upon when the timer elapses/when the time is over
     void whenElapsed(object o, ElapsedEventArgs e)
     {
         timer.Stop();
@@ -98,31 +110,30 @@ class window : Form
 
         resetClock();
 
-
         playBeep();
     }
 
     void drawClock(object o, PaintEventArgs pea)
     {
-        g = pea.Graphics;
-        g.SmoothingMode = SmoothingMode.AntiAlias;
+        graphics = pea.Graphics;
+        graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-        g.TranslateTransform(100, 100);
+        graphics.TranslateTransform(100, 100);
 
-        g.FillPolygon(Brushes.Gray, points);
-        g.FillEllipse(Brushes.Gray, 25, 25, 250, 250);
-        g.FillEllipse(Brushes.White, 30, 30, 240, 240);
-        
-        g.TranslateTransform(150, 150);
-        g.RotateTransform(myAngle);
-        g.FillRectangle(Brushes.Black, clockPointer);
-        g.ResetTransform();
+        graphics.FillPolygon(Brushes.Gray, points);
+        graphics.FillEllipse(Brushes.Gray, 25, 25, 250, 250);
+        graphics.FillEllipse(Brushes.White, 30, 30, 240, 240);
+
+        graphics.TranslateTransform(150, 150);
+        graphics.RotateTransform(myAngle);
+        graphics.FillRectangle(Brushes.Black, clockPointer);
+        graphics.ResetTransform();
     }
 
     void clockTicking(object o, ElapsedEventArgs e)
     {
         time++;
-        if(time > 60)
+        if (time > 60)
         {
             time = 1;
         }
@@ -137,6 +148,12 @@ class window : Form
         this.Invalidate();
     }
 
+    void stopTheClock(object o, EventArgs e)
+    {
+        whenElapsed(null, null);
+    }
+
+    //This function is called upon when the clock is done
     void playBeep()
     {
         Beep(null, null);
@@ -146,9 +163,10 @@ class window : Form
         beepTimer.Enabled = true;
     }
 
+    //This function plays the beeps
     void Beep(object o, ElapsedEventArgs e)
     {
-        if(amount == 3)
+        if (amount == 3)
         {
             beepTimer.Stop();
             beepTimer.Elapsed -= Beep;
@@ -164,3 +182,4 @@ class window : Form
         }
     }
 }
+
